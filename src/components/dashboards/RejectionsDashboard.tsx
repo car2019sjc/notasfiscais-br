@@ -127,7 +127,7 @@ export const RejectionsDashboard: React.FC<RejectionsDashboardProps> = ({ data, 
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-        <h2 className="text-3xl font-bold text-gray-800 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold" style={{ color: '#14489c' }}>
           Análise de Rejeições
         </h2>
         <button 

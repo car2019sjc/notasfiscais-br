@@ -27,6 +27,7 @@ function App() {
   });
   const [error, setError] = useState('');
   const [xlsxLoaded, setXlsxLoaded] = useState(false);
+  const [tabLoading, setTabLoading] = useState(false);
 
   const exportToExcel = useCallback((analysis: any) => {
     if (!window.XLSX) {
@@ -235,6 +236,7 @@ function App() {
               </span>
             </div>
             <p className="mt-4 text-gray-600 font-medium">Processando dados...</p>
+            <p className="mt-2 text-yellow-600 font-semibold text-base animate-pulse">Aguarde, o processamento pode levar alguns minutos dependendo do volume de dados.</p>
           </div>
         </Card>
       )}
@@ -243,7 +245,7 @@ function App() {
         <UploadZone 
           onFileSelect={handleFile} 
           file={rejectionsFile} 
-          title="Nota fiscal Rejections v3" 
+          title="Nota Fiscal Rejections" 
           id="rejections" 
         />
         <UploadZone 
@@ -270,7 +272,7 @@ function App() {
         <button 
           onClick={processFiles} 
           disabled={!rejectionsFile || !correctionsFile || isLoading || !xlsxLoaded}
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center mx-auto min-w-[200px] transform hover:scale-105 disabled:hover:scale-100"
+          className="bg-blue-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-blue-900 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center mx-auto min-w-[200px] transform hover:scale-105 disabled:hover:scale-100"
         >
           {isLoading ? (
             <>
@@ -290,46 +292,26 @@ function App() {
           )}
         </button>
       </div>
-
-      <Card className="bg-gray-900">
-        <div className="text-white">
-          <div className="flex items-center mb-4">
-            <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-            <p className="text-gray-300 font-bold">Logs de Processamento</p>
-          </div>
-          <div className="font-mono text-sm h-64 overflow-y-auto space-y-1">
-            {logs.length === 0 ? (
-              <p className="text-gray-500 italic">Aguardando processamento...</p>
-            ) : (
-              logs.map((log, i) => (
-                <div 
-                  key={i} 
-                  className={`flex items-start hover:bg-gray-800 p-2 rounded transition-colors duration-200 ${
-                    log.type === 'error' ? 'text-red-400' : 
-                    log.type === 'success' ? 'text-green-400' : 
-                    log.type === 'warning' ? 'text-yellow-400' :
-                    'text-gray-300'
-                  }`}
-                >
-                  <span className="w-20 shrink-0 text-gray-500">{log.timestamp}</span>
-                  <span className="flex-1">{log.message}</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </Card>
     </div>
   );
   
+  const handleTabChange = (tab: 'upload' | 'rejections' | 'corrections') => {
+    if (tab === activeTab) return;
+    setTabLoading(true);
+    setTimeout(() => {
+      setActiveTab(tab);
+      setTabLoading(false);
+    }, 600);
+  };
+
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
-      <header className="bg-white shadow-lg border-b-4 border-red-600">
+      <header className="bg-white shadow-lg border-b-4" style={{ borderBottomColor: '#fba412' }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
           <div className="flex items-center">
-            <BridgestoneLogo className="h-12 w-auto" />
+            <span className="text-3xl font-extrabold text-black">Bridgestone</span>
             <h1 className="text-xl md:text-2xl font-bold text-gray-800 ml-6">
-              Dashboard de Análise de Notas Fiscais
+              Dashboard de Análise de Notas Fiscais - Rejeições e Correções
             </h1>
           </div>
         </div>
@@ -346,30 +328,38 @@ function App() {
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => setActiveTab(id as any)}
+                  onClick={() => handleTabChange(id as any)}
                   className={`whitespace-nowrap py-6 px-1 border-b-4 font-bold text-sm transition-all duration-300 flex items-center ${
                     activeTab === id
-                      ? 'border-red-600 text-red-600'
+                      ? (id === 'upload' ? 'border-0 border-b-4' : 'border-red-600') + ' text-[#fba412] border-[#fba412]'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="w-5 h-5 mr-2" />
+                  <Icon className={`w-5 h-5 mr-2 ${activeTab === id && id === 'upload' ? 'text-[#fba412]' : ''}`} />
                   {label}
                 </button>
               ))}
             </nav>
           </div>
           
+          {tabLoading && (
+            <div className="flex justify-center items-center py-8">
+              <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-6 py-4 rounded-lg text-lg font-semibold shadow animate-pulse">
+                {activeTab === 'rejections' ? 'Recarregando dados de Notas Corrigidas...' : activeTab === 'corrections' ? 'Recarregando dados de Notas Rejeitadas...' : 'Carregando...'}
+              </div>
+            </div>
+          )}
+
           <div className="p-8">
-            {activeTab === 'upload' && renderUploadTab()}
-            {activeTab === 'rejections' && (
+            {!tabLoading && activeTab === 'upload' && renderUploadTab()}
+            {!tabLoading && activeTab === 'rejections' && (
               <RejectionsDashboard 
                 data={processedData.rejectionsData} 
                 sefazErrorMap={processedData.sefazErrorMap} 
                 onExport={exportToExcel}
               />
             )}
-            {activeTab === 'corrections' && (
+            {!tabLoading && activeTab === 'corrections' && (
               <CorrectionsDashboard 
                 data={processedData.correctionsData} 
                 onExport={exportToExcel}
@@ -378,6 +368,12 @@ function App() {
           </div>
         </div>
       </main>
+
+      <footer className="w-full py-4 bg-white border-t text-center mt-8">
+        <div className="text-gray-500 text-base">
+          OnSet Tecnologia © 2025 - Dashboard de Análise de Notas Fiscais - Bridgestone
+        </div>
+      </footer>
     </div>
   );
 }

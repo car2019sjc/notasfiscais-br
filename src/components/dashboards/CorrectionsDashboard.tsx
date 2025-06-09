@@ -181,7 +181,7 @@ export const CorrectionsDashboard: React.FC<CorrectionsDashboardProps> = ({ data
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-        <h2 className="text-3xl font-bold text-gray-800 bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold" style={{ color: '#14489c' }}>
           Análise de Correções
         </h2>
         <button 
@@ -260,7 +260,6 @@ export const CorrectionsDashboard: React.FC<CorrectionsDashboardProps> = ({ data
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card>
-          <h3 className="text-xl font-bold text-gray-700 mb-4">Top 1 a 5 Motivos de Correção</h3>
           {analysis.topReasons.length === 0 ? (
             <div className="text-center text-gray-500 py-16">Nenhum dado disponível para os motivos de correção.</div>
           ) : (
@@ -276,7 +275,6 @@ export const CorrectionsDashboard: React.FC<CorrectionsDashboardProps> = ({ data
           )}
         </Card>
         <Card>
-          <h3 className="text-xl font-bold text-gray-700 mb-4">Top 6 a 10 Motivos de Correção</h3>
           {analysis.topReasons.length <= 5 ? (
             <div className="text-center text-gray-500 py-16">Nenhum dado disponível para os motivos de correção.</div>
           ) : (

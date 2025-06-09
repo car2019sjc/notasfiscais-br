@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este aplicativo é um dashboard interativo desenvolvido em **React** para análise de correções fiscais, com foco em clareza visual, interatividade e apresentação profissional dos dados. Utiliza principalmente a biblioteca **Recharts** para gráficos e componentes customizados para modais, tabelas e filtros.
+Este aplicativo é um dashboard interativo desenvolvido em **React** para análise de correções e rejeições fiscais, com foco em clareza visual, interatividade e apresentação profissional dos dados. Utiliza principalmente a biblioteca **Recharts** para gráficos e componentes customizados para modais, tabelas e filtros.
 
 ---
 
@@ -12,16 +12,18 @@ Este aplicativo é um dashboard interativo desenvolvido em **React** para análi
 src/
 ├── components/
 │   ├── dashboards/
-│   │   └── CorrectionsDashboard.tsx   // Dashboard principal de correções
+│   │   ├── CorrectionsDashboard.tsx   // Dashboard principal de correções (cards, tabelas, gráficos, modais)
+│   │   └── RejectionsDashboard.tsx    // Dashboard principal de rejeições (cards, tabelas, gráficos, modais)
 │   ├── ui/
-│   │   ├── Card.tsx
-│   │   ├── ChartContainer.tsx
-│   │   ├── CustomTooltip.tsx
-│   │   ├── ExecutiveTable.tsx
-│   │   ├── ExecutiveChart.tsx
-│   │   ├── KPI.tsx
-│   │   └── Modal.tsx
-│   └── BridgestoneLogo.tsx
+│   │   ├── Card.tsx                  // Componente de card reutilizável
+│   │   ├── ChartContainer.tsx        // Container para gráficos
+│   │   ├── CustomTooltip.tsx         // Tooltip customizado para gráficos
+│   │   ├── ExecutiveTable.tsx        // Tabela executiva para exibição de dados
+│   │   ├── ExecutiveChart.tsx        // Gráficos executivos
+│   │   ├── KPI.tsx                   // Indicadores de performance
+│   │   ├── Modal.tsx                 // Componente de modal reutilizável
+│   │   └── UploadZone.tsx            // Card de upload de arquivos (drag and drop)
+│   └── BridgestoneLogo.tsx           // Logo antigo (atualmente substituído por texto)
 ├── utils/
 │   ├── dataAnalysis.ts                // Funções de análise e agrupamento de dados
 │   └── correctionAnalysis.ts          // Funções auxiliares para CNPJ e planta
@@ -29,10 +31,58 @@ src/
 │   ├── index.ts                       // Tipos globais
 │   └── corrections.ts                 // Tipos específicos de correções
 ├── constants.ts                       // Cores e constantes visuais
-└── App.tsx                            // Componente raiz
+├── App.tsx                            // Componente raiz (layout, navegação, loading, upload, mensagens)
+└── index.css                          // Estilos globais (Tailwind)
 ```
 
 ---
+
+## Pontos de Localização Rápida
+
+- **Cards de Upload:**
+  - Local: `src/components/ui/UploadZone.tsx`
+  - Customização de cor, hover, ícone e texto.
+
+- **Cards de Motivos de Correção/Rejeição:**
+  - Local: `CorrectionsDashboard.tsx` e `RejectionsDashboard.tsx`
+  - Utilizam o componente `ExecutiveTable` para exibir dados tabulares.
+
+- **Funções de Análise de Dados:**
+  - Local: `src/utils/dataAnalysis.ts`
+  - Funções como `analyzeCorrectionReasons`, `analyzeCancelationReasons`, `calculateMonthlyVolumeCorrections`.
+
+- **Modais:**
+  - Local: `src/components/ui/Modal.tsx`
+  - Usados para exibir detalhes de CNPJs, motivos, etc.
+
+- **Mensagens de Loading e Processamento:**
+  - Local: `App.tsx` (estados `isLoading`, `tabLoading` e mensagens informativas)
+
+- **Navegação e Layout Principal:**
+  - Local: `App.tsx`
+  - Troca de abas, barra de progresso, mensagens de recarregamento.
+
+---
+
+## Como Personalizar
+
+- **Cores dos cards e botões:**
+  - Editar classes Tailwind ou estilos inline nos componentes correspondentes.
+- **Mensagens e textos:**
+  - Editar diretamente nos componentes de dashboard ou upload.
+- **Novos modais ou cards:**
+  - Criar novos componentes em `src/components/ui/` e importar nos dashboards.
+
+---
+
+## Observações
+- O sistema está preparado para receber novos cards, KPIs, tabelas e modais de forma modular.
+- Para localizar rapidamente qualquer elemento visual, busque pelo nome do componente ou pelo texto exibido na interface.
+- O arquivo `App.tsx` centraliza a navegação, upload e estados globais de loading.
+
+---
+
+**Última atualização:** 2024-06
 
 ## Componentes e Funções Principais
 
