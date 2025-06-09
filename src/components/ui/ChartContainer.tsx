@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from './Card';
 
 interface ChartContainerProps {
-  title: string;
+  title: React.ReactNode;
   icon: React.ReactNode;
   children: React.ReactNode;
 }
