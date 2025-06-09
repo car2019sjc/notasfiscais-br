@@ -1,0 +1,462 @@
+&lt;zip file_name="dashboard_bridgestone_backup_v2.6.zip">
+&lt;file name="dashboard_bridgestone.html">
+&lt;!DOCTYPE html>
+&lt;html lang="pt">
+&lt;head>
+&lt;meta charset="UTF-8">
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0">
+&lt;title>Dashboard Bridgestone&lt;/title>
+&lt;!-- Tailwind CSS -->
+&lt;script src="https://cdn.tailwindcss.com">&lt;/script>
+&lt;!-- React -->
+&lt;script src="[https://unpkg.com/react@18/umd/react.development.js](https://unpkg.com/react@18/umd/react.development.js)">&lt;/script>
+&lt;script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js">&lt;/script>
+&lt;!-- Babel for JSX -->
+&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js">&lt;/script>
+&lt;!-- Recharts for Charts -->
+&lt;script src="https://unpkg.com/recharts/umd/Recharts.min.js">&lt;/script>
+&lt;!-- SheetJS (xlsx) for Excel processing -->
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">&lt;/script>
+
+<style>
+    @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)');
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.5s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+</style>
+&lt;/head>
+&lt;body class="bg-gray-100">
+
+<div id="root"></div>
+
+<script type="text/babel">
+function startApp() {
+    // --- Destructuring Recharts components from global object ---
+    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart: RechartsPieChart, Pie, Cell, LineChart, Line, ComposedChart } = window.Recharts;
+
+    // --- Icon Components (Replaced from lucide-react) ---
+    const Icon = ({ children, className }) => <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>;
+    const Upload = ({ className }) => <Icon className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></Icon>;
+    const BarChart3 = ({ className }) => <Icon className={className}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></Icon>;
+    const PieChartIcon = ({ className }) => <Icon className={className}><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></Icon>;
+    const TrendingUp = ({ className }) => <Icon className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></Icon>;
+    const Download = ({ className }) => <Icon className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></Icon>;
+    const RefreshCw = ({ className }) => <Icon className={className}><path d="M3 2v6h6"/><path d="M21 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.5 12.5"/><path d="M2 12.5a10 10 0 0 0 18.5-1"/></Icon>;
+    const X = ({ className }) => <Icon className={className}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
+    const AlertCircle = ({ className }) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></Icon>;
+    const Building2 = ({ className }) => <Icon className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></Icon>;
+    const FileX = ({ className }) => <Icon className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9.5" y1="12.5" x2="14.5" y2="17.5"/><line x1="14.5" y1="12.5" x2="9.5" y2="17.5"/></Icon>;
+    const Loader2 = ({ className }) => <Icon className={className + " animate-spin"}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></Icon>;
+    const FileSpreadsheet = ({ className }) => <Icon className={className}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h1"/><path d="M15 13h1"/><path d="M8 17h1"/><path d="M15 17h1"/></Icon>;
+    const ListChecks = ({ className }) => <Icon className={className}><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></Icon>;
+    const Filter = ({ className }) => <Icon className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></Icon>;
+    const CalendarDays = ({ className }) => <Icon className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></Icon>;
+    
+    // --- Constantes ---
+    const BRIDGESTONE_COLORS = {
+      primary: '#E31E24', secondary: '#1E3A8A', accent: '#F59E0B',
+      success: '#10B981', info: '#3B82F6', gray: '#6B7280',
+    };
+    const CHART_COLORS = ['#E31E24', '#1E3A8A', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
+
+    // --- Funções Utilitárias Globais ---
+    const robustParseDate = (value) => {
+        if (!value) return null;
+        if (value instanceof Date && !isNaN(value)) {
+            return value;
+        }
+        if (typeof value === 'number') {
+            const excelDate = new Date((value - 25569) * 86400 * 1000);
+            const date = new Date(excelDate.getTime() + (excelDate.getTimezoneOffset() * 60000));
+            return date;
+        }
+        if (typeof value === 'string') {
+            const partsDDMMYYYY = value.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})/);
+            if (partsDDMMYYYY) {
+                const date = new Date(partsDDMMYYYY[3], partsDDMMYYYY[2] - 1, partsDDMMYYYY[1]);
+                return date;
+            }
+            const partsMYYYY = value.match(/^(\d{1,2})-(\d{4})$/);
+            if (partsMYYYY) {
+                const date = new Date(partsMYYYY[2], partsMYYYY[1] - 1, 1);
+                return date;
+            }
+            const isoDate = new Date(value);
+            if (!isNaN(isoDate)) {
+                const date = new Date(isoDate.getTime() + (isoDate.getTimezoneOffset() * 60000));
+                return date;
+            }
+        }
+        return null;
+    };
+    
+    // --- Componentes de UI Genéricos ---
+    const Card = ({ children, className = '' }) => <div className={`bg-white rounded-lg shadow-md p-4 sm:p-6 fade-in ${className}`}>{children}</div>;
+    const KPI = ({ title, value, icon, color }) => (
+      <Card className="flex items-center">
+        <div className={`p-3 rounded-full mr-4`} style={{ backgroundColor: `${color}1A`, color: color }}>{icon}</div>
+        <div>
+          <p className="text-sm text-gray-500">{title}</p>
+          <p className="text-2xl font-bold text-gray-800">{value}</p>
+        </div>
+      </Card>
+    );
+    const ChartContainer = ({ title, icon, children }) => (
+      <Card>
+        <div className="flex items-center mb-4"><div className="text-bridgestone-primary mr-2">{icon}</div><h3 className="text-lg font-semibold text-gray-700">{title}</h3></div>
+        <div style={{ width: '100%', height: 300 }}>{children}</div>
+      </Card>
+    );
+    const CustomTooltip = ({ active, payload, label }) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
+            <p className="font-bold text-gray-800">{label}</p>
+            {payload.map((entry, index) => <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry.value.toLocaleString('pt-BR')}`}</p>)}
+          </div>
+        );
+      }
+      return null;
+    };
+    const ExecutiveTable = ({ title, icon, data, columns }) => {
+        const maxValue = data.length > 0 ? Math.max(...data.map(item => item[columns[1].accessor])) : 0;
+        return (
+            <Card>
+                <div className="flex items-center mb-4"><div className="text-bridgestone-primary mr-2">{icon}</div><h3 className="text-lg font-semibold text-gray-700">{title}</h3></div>
+                <div className="overflow-x-auto"><table className="min-w-full divide-y divide-gray-200"><thead className="bg-gray-50"><tr>
+                    {columns.map((col, i) => <th key={i} scope="col" className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.className||''}`}>{col.header}</th>)}
+                </tr></thead><tbody className="bg-white divide-y divide-gray-200">
+                    {data.map((item, i) => <tr key={i}><td className="px-6 py-4 text-sm text-gray-900 max-w-xs break-words">{item[columns[0].accessor]}</td><td className="px-6 py-4 text-sm text-gray-500">
+                        <div className="flex items-center"><span className="w-12 text-right mr-4 font-bold">{item[columns[1].accessor].toLocaleString('pt-BR')}</span><div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div className="bg-bridgestone-primary h-2.5 rounded-full" style={{ width: `${(item[columns[1].accessor] / maxValue) * 100}%` }}></div>
+                        </div></div>
+                    </td></tr>)}
+                </tbody></table></div>
+            </Card>
+        );
+    };
+    
+    // --- Lógica de Análise de Dados (Isolada) ---
+    const standardizeErrorMessage = (msg) => {
+        if (typeof msg !== 'string' || !msg.trim()) return 'Motivo não especificado';
+        const rules = [ { pattern: /tipo de emissãoalterado/i, replacement: "Erro: Alteração do tipo de emissão da NF-e" }, { pattern: /o valor '.*?' do campo '(.*?)' é inválido/i, replacement: (m) => `Erro: Valor inválido no campo '${m[1]}'`}, { pattern: /rejeição:\s*(.*)/i, replacement: (m) => `Rejeição SEFAZ: ${m[1].split('.')[0]}`}, { pattern: /o status da nf-e.*?foi alterado para erro/i, replacement: "Status da NF-e alterado para Erro na SEFAZ"}, { pattern: /<|>/, replacement: 'Erro de formatação (HTML/XML na mensagem)'}, { pattern: /line number|column number/i, replacement: 'Erro de estrutura do arquivo (Linha/Coluna)'}, { pattern: /sefaz/i, replacement: 'Erro de comunicação com a SEFAZ'}, ];
+        for (const rule of rules) { const match = msg.match(rule.pattern); if (match) return typeof rule.replacement === 'function' ? rule.replacement(match) : rule.replacement; }
+        return msg.substring(0, 100) + (msg.length > 100 ? '...' : '');
+    };
+    const analyzeCancelationReasons = (data, sefazErrorMap) => {
+        const reasonCounts = data.reduce((acc, row) => {
+            let reasonFound = false;
+            const statusCode = row['Código status'];
+            if (statusCode && sefazErrorMap.has(String(statusCode).trim())) {
+                let reason = sefazErrorMap.get(String(statusCode).trim());
+                reason = reason.replace(/^rejei[cç][ãa]o:\s*/i, '');
+                acc[`Rejeição: ${reason}`] = (acc[`Rejeição: ${reason}`] || 0) + 1;
+                reasonFound = true;
+            }
+            if (!reasonFound) {
+                const textReasons = [ row['Motivo para estorno/não utilização'], row['Motivo para estorno/não utilização__1'], row['Motivo para estorno/não utilização__2'], row['Motivo para estorno/não utilização__3'], row['Motivo para estorno/não utilização__4'], ];
+                for (const textReason of textReasons) {
+                    if (textReason && typeof textReason === 'string' && textReason.trim() !== '' && textReason.trim() !== 'N/A') {
+                        const cleanedReason = standardizeErrorMessage(textReason);
+                        acc[cleanedReason] = (acc[cleanedReason] || 0) + 1;
+                        break; 
+                    }
+                }
+            }
+            return acc;
+        }, {});
+        return Object.entries(reasonCounts).map(([motivo, count]) => ({ motivo, count })).sort((a, b) => b.count - a.count).slice(0, 10);
+    };
+    const analyzeBotVsAnalysts = (data) => {
+        const distribution = data.reduce((acc, row) => {
+            const modifiedBy = (row['Modificado por'] || '').toUpperCase();
+            let category = 'Outros';
+            if (modifiedBy.includes('NFERPABRAZIL') || modifiedBy.includes('S_RF_DFE') || modifiedBy.includes('RPA')) category = 'Bot (Automação)';
+            else if (modifiedBy.includes('KATIANE') || modifiedBy.includes('CAROLAINE') || modifiedBy.includes('SOUZA')) category = 'Sala de Guerra';
+            acc[category] = (acc[category] || 0) + 1;
+            return acc;
+        }, { 'Bot (Automação)': 0, 'Sala de Guerra': 0, 'Outros': 0 });
+        return Object.entries(distribution).map(([name, value]) => ({ name, value }));
+    };
+    const calculateMonthlyVolume = (data) => {
+        const monthlyData = data.reduce((acc, row) => {
+            const date = robustParseDate(row['Data de modificação']);
+            if (!date) return acc;
+            const monthKey = date.toLocaleDateString('pt-BR', { year: '2-digit', month: 'short' });
+            if (!acc[monthKey]) acc[monthKey] = { dateObj: new Date(date.getFullYear(), date.getMonth(), 1), mes: monthKey, total: 0, bot: 0, analistas: 0 };
+            acc[monthKey].total += 1;
+            const modifiedBy = (row['Modificado por'] || '').toUpperCase();
+            if (modifiedBy.includes('NFERPABRAZIL') || modifiedBy.includes('S_RF_DFE')) acc[monthKey].bot += 1;
+            else acc[monthKey].analistas += 1;
+            return acc;
+        }, {});
+        return Object.values(monthlyData).sort((a, b) => a.dateObj - b.dateObj);
+    };
+    const analyzeShiftDistribution = (data) => {
+        const shiftCounts = data.reduce((acc, row) => {
+            const shift = row['Turno'];
+            if (shift && ['T1', 'T2', 'T3'].includes(shift)) acc[shift] = (acc[shift] || 0) + 1;
+            return acc;
+        }, { T1: 0, T2: 0, T3: 0 });
+        return Object.entries(shiftCounts).map(([name, value]) => ({ name, value }));
+    };
+    const analyzeRejectionsByDayTypeAndShift = (data) => {
+        const result = { T1: { 'Semana': 0, 'Fim de Semana': 0 }, T2: { 'Semana': 0, 'Fim de Semana': 0 }, T3: { 'Semana': 0, 'Fim de Semana': 0 }, };
+        data.forEach(row => {
+            const shift = row['Turno'];
+            const dayTypeRaw = row['Tipo Semana'];
+            if (shift && result[shift] && dayTypeRaw) {
+                const dayType = dayTypeRaw.toLowerCase() === 'week' ? 'Semana' : 'Fim de Semana';
+                result[shift][dayType] += 1;
+            }
+        });
+        return Object.keys(result).map(shift => ({ name: shift, ...result[shift] }));
+    };
+    const analyzeCorrectionsByPlant = (data) => {
+        const plantCounts = data.reduce((acc, row) => {
+            const plant = row['Planta'];
+            if (plant) acc[plant] = (acc[plant] || 0) + 1;
+            return acc;
+        }, {});
+        return Object.entries(plantCounts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    };
+    const analyzeCorrectionReasons = (data) => {
+        const reasonCounts = data.reduce((acc, row) => {
+            const reason = row['Motivo Tax'];
+            if (reason) acc[reason] = (acc[reason] || 0) + 1;
+            return acc;
+        }, {});
+        return Object.entries(reasonCounts).map(([motivo, count]) => ({ motivo, count })).sort((a, b) => b.count - a.count).slice(0, 10);
+    };
+
+    // **Componente Dashboard de Rejeições**
+    const RejectionsDashboard = ({ data, sefazErrorMap, onExport }) => {
+        const [dateFilter, setDateFilter] = React.useState({ startDate: '', endDate: '' });
+
+        const filteredData = React.useMemo(() => {
+            const { startDate, endDate } = dateFilter;
+            if (!startDate && !endDate) return data;
+            const startNum = startDate ? parseInt(startDate.replace(/-/g, ''), 10) : null;
+            const endNum = endDate ? parseInt(endDate.replace(/-/g, ''), 10) : null;
+            
+            const dateToNumber = (d) => d ? parseInt(`${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`, 10) : null;
+
+            return data.filter(row => {
+                const rowDateNum = dateToNumber(robustParseDate(row['Data de modificação']));
+                if (!rowDateNum) return false;
+                const isAfterStart = startNum ? rowDateNum >= startNum : true;
+                const isBeforeEnd = endNum ? rowDateNum <= endNum : true;
+                return isAfterStart && isBeforeEnd;
+            });
+        }, [data, dateFilter]);
+        
+        const analysis = React.useMemo(() => {
+            const botVsAnalysts = analyzeBotVsAnalysts(filteredData);
+            const automationRate = botVsAnalysts.reduce((sum, d) => sum + d.value, 0) > 0 ? ((botVsAnalysts.find(d => d.name === 'Bot (Automação)')?.value || 0) / botVsAnalysts.reduce((sum, d) => sum + d.value, 0)) * 100 : 0;
+            return {
+                total: filteredData.length, topReasons: analyzeCancelationReasons(filteredData, sefazErrorMap), botVsAnalysts, automationRate,
+                monthlyVolume: calculateMonthlyVolume(filteredData), shiftDistribution: analyzeShiftDistribution(filteredData), rejectionsByDayTypeAndShift: analyzeRejectionsByDayTypeAndShift(filteredData)
+            }
+        }, [filteredData, sefazErrorMap]);
+        
+        return ( <div className="space-y-6"> <div className="flex flex-col md:flex-row justify-between md:items-center gap-4"> <h2 className="text-2xl font-bold text-gray-800">Análise de Rejeições</h2> <button onClick={() => onExport({topCancelReasons: analysis.topReasons, botVsAnalysts: analysis.botVsAnalysts, monthlyVolume: analysis.monthlyVolume, shiftDistribution: analysis.shiftDistribution, rejectionsByDayTypeAndShift: analysis.rejectionsByDayTypeAndShift})} className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-all duration-300 flex items-center justify-center"> <Download className="mr-2 h-5 w-5" />Exportar Análise </button> </div> <Card> <div className="flex items-center gap-2 mb-4"><Filter className="w-5 h-5 text-bridgestone-primary"/><h3 className="text-lg font-semibold text-gray-700">Filtros</h3></div> <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"> <div><label htmlFor="startDateRej" className="block text-sm font-medium text-gray-700">Data de Início</label><input type="date" name="startDate" id="startDateRej" value={dateFilter.startDate} onChange={(e) => setDateFilter(p => ({...p, startDate: e.target.value}))} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/></div> <div><label htmlFor="endDateRej" className="block text-sm font-medium text-gray-700">Data de Fim</label><input type="date" name="endDate" id="endDateRej" value={dateFilter.endDate} onChange={(e) => setDateFilter(p => ({...p, endDate: e.target.value}))} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/></div> <div><button onClick={() => setDateFilter({ startDate: '', endDate: ''})} className="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600"><X className="inline-block mr-2 h-4 w-4"/>Limpar</button></div> </div> </Card> <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"><KPI title="Total de Cancelamentos" value={analysis.total.toLocaleString('pt-BR')} icon={<FileX />} color={BRIDGESTONE_COLORS.primary} /><KPI title="Taxa de Automação" value={`${analysis.automationRate.toFixed(1)}%`} icon={<Loader2 />} color={BRIDGESTONE_COLORS.info} /></div> <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"> <ExecutiveTable title="Top 10 Motivos de Cancelamento" icon={<BarChart3 />} data={analysis.topReasons} columns={[{ header: "Motivo Padronizado", accessor: 'motivo'}, { header: "Ocorrências", accessor: 'count'}]} /> <ChartContainer title="Bot vs. Sala de Guerra" icon={<PieChartIcon />}><ResponsiveContainer><RechartsPieChart><Pie data={analysis.botVsAnalysts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>{analysis.botVsAnalysts.map((e, i) => <Cell key={`cell-${i}`} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}</Pie><Tooltip content={<CustomTooltip />}/><Legend /></RechartsPieChart></ResponsiveContainer></ChartContainer> <ChartContainer title="Volume Mensal" icon={<TrendingUp />}><ResponsiveContainer><ComposedChart data={analysis.monthlyVolume}><CartesianGrid /><XAxis dataKey="mes" /><YAxis /><Tooltip content={<CustomTooltip />}/><Legend /><Bar dataKey="bot" stackId="a" fill={BRIDGESTONE_COLORS.info} name="Bot" /><Bar dataKey="analistas" stackId="a" fill={BRIDGESTONE_COLORS.accent} name="Analistas" /><Line type="monotone" dataKey="total" stroke={BRIDGESTONE_COLORS.primary} strokeWidth={2} name="Total"/></ComposedChart></ResponsiveContainer></ChartContainer> <ChartContainer title="Distribuição por Turno" icon={<BarChart3 />}><ResponsiveContainer><BarChart data={analysis.shiftDistribution}><CartesianGrid /><XAxis dataKey="name" /><YAxis /><Tooltip content={<CustomTooltip />}/><Bar dataKey="value" name="Volume" fill={BRIDGESTONE_COLORS.secondary} /></BarChart></ResponsiveContainer></ChartContainer> <ChartContainer title="Rejeições por Período e Turno" icon={<CalendarDays />}><ResponsiveContainer><BarChart data={analysis.rejectionsByDayTypeAndShift}><CartesianGrid /><XAxis dataKey="name" /><YAxis /><Tooltip content={<CustomTooltip />}/><Legend /><Bar dataKey="Semana" fill={BRIDGESTONE_COLORS.info} name="Semana" /><Bar dataKey="Fim de Semana" fill={BRIDGESTONE_COLORS.accent} name="Fim de Semana" /></BarChart></ResponsiveContainer></ChartContainer> </div> </div> );
+    };
+
+    // **Componente Dashboard de Correções**
+    const CorrectionsDashboard = ({ data, onExport }) => {
+        const [dateFilter, setDateFilter] = React.useState({ startDate: '', endDate: '' });
+
+        const filteredData = React.useMemo(() => {
+            const { startDate, endDate } = dateFilter;
+            if (!startDate && !endDate) return data;
+            
+            const startNum = startDate ? parseInt(startDate.replace(/-/g, ''), 10) : null;
+            const endNum = endDate ? parseInt(endDate.replace(/-/g, ''), 10) : null;
+            
+            const dateToNumber = (d) => d ? parseInt(`${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`, 10) : null;
+            
+            return data.filter(row => {
+                const rowDate = robustParseDate(row['Data']); // Usa a função global robusta
+                const rowDateNum = dateToNumber(rowDate);
+                if (!rowDateNum) return false;
+                const isAfterStart = startNum ? rowDateNum >= startNum : true;
+                const isBeforeEnd = endNum ? rowDateNum <= endNum : true;
+                return isAfterStart && isBeforeEnd;
+            });
+        }, [data, dateFilter]);
+
+        const analysis = React.useMemo(() => ({
+            total: filteredData.length,
+            topReasons: analyzeCorrectionReasons(filteredData),
+            byPlant: analyzeCorrectionsByPlant(filteredData),
+            activePlants: [...new Set(filteredData.map(r => r['Planta']))].length
+        }), [filteredData]);
+        
+        return ( <div className="space-y-6"> <div className="flex flex-col md:flex-row justify-between md:items-center gap-4"> <h2 className="text-2xl font-bold text-gray-800">Análise de Correções</h2> <button onClick={() => onExport({topCorrectionReasons: analysis.topReasons, correctionsByPlant: analysis.byPlant})} className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 flex items-center justify-center"> <Download className="mr-2 h-5 w-5" />Exportar Análise </button> </div> <Card> <div className="flex items-center gap-2 mb-4"><Filter className="w-5 h-5 text-bridgestone-primary"/><h3 className="text-lg font-semibold text-gray-700">Filtros</h3></div> <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"> <div><label htmlFor="startDateCorr" className="block text-sm font-medium text-gray-700">Data de Início</label><input type="date" name="startDate" id="startDateCorr" value={dateFilter.startDate} onChange={(e) => setDateFilter(p => ({...p, startDate: e.target.value}))} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/></div> <div><label htmlFor="endDateCorr" className="block text-sm font-medium text-gray-700">Data de Fim</label><input type="date" name="endDate" id="endDateCorr" value={dateFilter.endDate} onChange={(e) => setDateFilter(p => ({...p, endDate: e.target.value}))} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/></div> <div><button onClick={() => setDateFilter({ startDate: '', endDate: ''})} className="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600"><X className="inline-block mr-2 h-4 w-4"/>Limpar</button></div> </div> </Card> <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"> <KPI title="Total de Correções" value={analysis.total.toLocaleString('pt-BR')} icon={<RefreshCw />} color={BRIDGESTONE_COLORS.accent} /> <KPI title="Plantas Ativas" value={analysis.activePlants} icon={<Building2 />} color={BRIDGESTONE_COLORS.success} /> </div> <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"> <ExecutiveTable title="Top 10 Motivos de Correção" icon={<BarChart3 />} data={analysis.topReasons} columns={[{ header: "Motivo da Correção", accessor: 'motivo' }, { header: "Ocorrências", accessor: 'count' }]} /> <ChartContainer title="Volume de Correções por Planta" icon={<Building2 />}><ResponsiveContainer><BarChart data={analysis.byPlant}><CartesianGrid /><XAxis dataKey="name" /><YAxis /><Tooltip content={<CustomTooltip />}/><Bar dataKey="value" name="Volume" fill={BRIDGESTONE_COLORS.success} /></BarChart></ResponsiveContainer></ChartContainer> </div> </div> );
+    };
+
+    // Componente Principal
+    function App() {
+        const [activeTab, setActiveTab] = React.useState('upload');
+        const [rejectionsFile, setRejectionsFile] = React.useState(null);
+        const [correctionsFile, setCorrectionsFile] = React.useState(null);
+        const [isLoading, setIsLoading] = React.useState(false);
+        const [progress, setProgress] = React.useState(0);
+        const [logs, setLogs] = React.useState([]);
+        const [processedData, setProcessedData] = React.useState({ rejectionsData: [], correctionsData: [], sefazErrorMap: new Map() });
+        const [error, setError] = React.useState('');
+        const [xlsxLoaded, setXlsxLoaded] = React.useState(false);
+
+        const exportToExcel = React.useCallback((analysis) => {
+            const wb = window.XLSX.utils.book_new();
+            for (const [key, value] of Object.entries(analysis)) {
+                if (value?.length) {
+                    const sheetName = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+                    const ws = window.XLSX.utils.json_to_sheet(value);
+                    window.XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
+                }
+            }
+            const timestamp = new Date().toISOString().split('T')[0];
+            window.XLSX.writeFile(wb, `Relatorio_Dashboard_Bridgestone_${timestamp}.xlsx`);
+        }, []);
+
+        React.useEffect(() => {
+            if (window.XLSX) { setXlsxLoaded(true); return; }
+            const script = document.createElement('script');
+            script.src = '[https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js](https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js)';
+            script.async = true;
+            script.onload = () => { addLog("Biblioteca de Excel carregada.", "success"); setXlsxLoaded(true); };
+            script.onerror = () => { addLog("Falha ao carregar a biblioteca de Excel.", "error"); setError('Falha ao carregar um recurso essencial.'); };
+            document.body.appendChild(script);
+            return () => { if (document.body.contains(script)) document.body.removeChild(script); };
+        }, []);
+
+        const addLog = (message, type = 'info') => {
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            setLogs(prev => [{ timestamp, message, type }, ...prev]);
+        };
+        
+        const handleFile = (file, type) => {
+            if (!file) return;
+            if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' && file.type !== 'application/vnd.ms-excel') {
+                setError(`Tipo de arquivo inválido para ${type}. Por favor, use .xlsx ou .xls.`);
+                return;
+            }
+            if (type === 'rejections') setRejectionsFile(file);
+            else setCorrectionsFile(file);
+            addLog(`Arquivo '${file.name}' carregado.`, 'success');
+            setError('');
+        };
+        
+        const processSheetInChunks = async (workbook, sheetName, onProgress) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    const worksheet = workbook.Sheets[sheetName];
+                    if (!worksheet) throw new Error(`Aba '${sheetName}' não encontrada.`);
+                    const jsonData = window.XLSX.utils.sheet_to_json(worksheet, { defval: '', blankrows: false, raw: false });
+                    const totalRows = jsonData.length;
+                    if (totalRows === 0) { onProgress(100); resolve([]); return; }
+                    const chunkSize = 500; let currentIndex = 0; let processedData = [];
+                    function processChunk() {
+                        processedData.push(...jsonData.slice(currentIndex, currentIndex + chunkSize));
+                        currentIndex += chunkSize;
+                        onProgress(Math.min(100, (currentIndex / totalRows) * 100));
+                        if (currentIndex < totalRows) setTimeout(processChunk, 0); else resolve(processedData);
+                    }
+                    processChunk();
+                } catch (err) { reject(err); }
+            });
+        };
+
+        const processFiles = React.useCallback(() => {
+            if (!rejectionsFile || !correctionsFile) { setError("Por favor, carregue ambos os arquivos."); return; }
+            if (!xlsxLoaded) { setError("Aguarde o carregamento da biblioteca de Excel."); return; }
+
+            setIsLoading(true); setProgress(0); setLogs([]); setError(''); setProcessedData({ rejectionsData: [], correctionsData: [], sefazErrorMap: new Map() });
+
+            setTimeout(async () => {
+                try {
+                    addLog("Lendo arquivos..."); setProgress(5);
+                    const [rejectionsBuffer, correctionsBuffer] = await Promise.all([rejectionsFile.arrayBuffer(), correctionsFile.arrayBuffer()]);
+                    addLog("Analisando estrutura..."); setProgress(10);
+                    const rejectionsWb = window.XLSX.read(rejectionsBuffer, { type: 'buffer', cellDates: true });
+                    const correctionsWb = window.XLSX.read(correctionsBuffer, { type: 'buffer', cellDates: true });
+                    addLog("Criando dicionário de erros SEFAZ...");
+                    const sefazSheet = rejectionsWb.Sheets['Lista Erros Sefaz'];
+                    if (!sefazSheet) throw new Error("Aba 'Lista Erros Sefaz' não encontrada.");
+                    const sefazErrorList = window.XLSX.utils.sheet_to_json(sefazSheet, { header: 1 });
+                    const sefazErrorMap = new Map(sefazErrorList.map(row => [String(row[0]).trim(), String(row[1]).trim()]));
+                    addLog(`Dicionário com ${sefazErrorMap.size} erros criado.`); setProgress(20);
+                    addLog("Processando dados de Rejeições...");
+                    const rejectionsData = await processSheetInChunks(rejectionsWb, 'Base Consolidado', (p) => setProgress(20 + (p * 0.35)));
+                    addLog("Processando dados de Correções...");
+                    const correctionsData = await processSheetInChunks(correctionsWb, 'Listagem de Eventos', (p) => setProgress(55 + (p * 0.4)));
+                    addLog(`Encontrados ${rejectionsData.length} registros de rejeição e ${correctionsData.length} de correção.`, 'info');
+                    setProcessedData({ rejectionsData, correctionsData, sefazErrorMap });
+                    setProgress(100); addLog("Análise concluída!", 'success'); setActiveTab('rejections');
+                } catch (err) { setError(`Erro: ${err.message}. Verifique nomes das abas.`); addLog(`ERRO: ${err.message}`, 'error');
+                } finally { setTimeout(() => { setIsLoading(false); setProgress(0); }, 1000); }
+            }, 50);
+        }, [rejectionsFile, correctionsFile, xlsxLoaded]);
+        
+        const UploadZone = ({ onFileSelect, file, title, id }) => {
+          const [isDragging, setIsDragging] = React.useState(false);
+          return (
+            <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 ${isDragging ? 'border-bridgestone-primary bg-red-50' : 'border-gray-300'}`}
+                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }} onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }} onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); if (e.dataTransfer.files && e.dataTransfer.files[0]) onFileSelect(e.dataTransfer.files[0], id); }}>
+                <input type="file" id={id} className="hidden" accept=".xlsx, .xls" onChange={(e) => onFileSelect(e.target.files[0], id)} />
+                <label htmlFor={id} className="cursor-pointer flex flex-col items-center"><FileSpreadsheet className="w-12 h-12 text-gray-400 mb-2" /><span className="font-semibold text-bridgestone-secondary">{title}</span><p className="text-xs text-gray-500 mt-1">Arraste e solte ou clique</p>{file && <p className="text-sm font-medium text-green-600 mt-2 truncate max-w-xs">{file.name}</p>}</label>
+            </div>
+          );
+        };
+
+        const renderUploadTab = () => (
+            <div className="space-y-8">
+                <h2 className="text-2xl font-bold text-gray-800">Upload de Planilhas</h2>
+                {isLoading && (<div className="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden"><div className="bg-bridgestone-primary h-4 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div><span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference">{`${progress.toFixed(0)}%`}</span></div>)}
+                <div className="grid md:grid-cols-2 gap-8"><UploadZone onFileSelect={handleFile} file={rejectionsFile} title="Nota fiscal Rejections v3" id="rejections" /><UploadZone onFileSelect={handleFile} file={correctionsFile} title="Nota fiscal Correction Letter" id="corrections" /></div>
+                {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md"><AlertCircle className="inline-block mr-2" />{error}</div>}
+                <div className="text-center"><button onClick={processFiles} disabled={!rejectionsFile || !correctionsFile || isLoading || !xlsxLoaded} className="bg-bridgestone-primary text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center mx-auto min-w-[200px]">{isLoading ? `Processando...` : !xlsxLoaded ? <><Loader2 className="animate-spin mr-2" />Carregando</> : <><ListChecks className="mr-2" />Processar Dados</>}</button></div>
+                <div className="bg-gray-800 text-white rounded-lg p-4 font-mono text-sm h-48 overflow-y-auto"><p className="text-gray-400 pb-2 border-b border-gray-600">Logs de Processamento:</p>{logs.map((log, i) => (<p key={i} className={`flex items-start ${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-green-400' : 'text-gray-300'}`}><span className="w-20 shrink-0">{log.timestamp}</span><span className="flex-1">{log.message}</span></p>))}</div>
+            </div>
+        );
+        
+        return (
+            <div className="bg-gray-100 min-h-screen font-sans">
+                <header className="bg-white shadow-md">
+                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                       <div className="flex items-center"><svg className="h-10 w-auto" viewBox="0 0 200 60" fill="none" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path d="M26.44 53.64L0 50.28V8.92L26.44 5.56V53.64ZM14.07 15.11V44.09L22.18 45.1V14.01L14.07 15.11Z" fill="#E31E24"/><path d="M54.19 41.52C59.6 41.52 64.09 37.91 64.09 31.83C64.09 25.75 59.6 22.14 54.19 22.14H40.2V41.52H54.19ZM54.55 26.5C57.03 26.5 58.94 28.53 58.94 31.83C58.94 35.13 57.03 37.16 54.55 37.16H45.35V26.5H54.55Z" fill="#1A1A1A"/><path d="M91.89 41.52C96.94 41.52 100.32 37.91 100.32 33.36C100.32 29.5 98.23 26.32 94.67 24.81L99.22 18H93.14L89.47 25.13H86.43V18H81.28V41.52H86.43V29.5H89.29L93.58 41.52H99.4L95.29 33.54C96.94 34.08 97.63 35.49 97.63 37.25C97.63 39.86 95.88 41.52 91.89 41.52Z" fill="#1A1A1A"/><path d="M129.23 41.52V35.67H115.06V41.52H109.91V18H115.06V29.68H129.23V23.83L135.31 18H142.1L134.58 26.12L142.46 41.52H135.5L130.35 32.25L129.23 32.87V41.52H129.23Z" fill="#1A1A1A"/><path d="M165.73 41.52C172.99 41.52 177.3 36.98 177.3 31.83C177.3 26.68 172.99 22.14 165.73 22.14C158.47 22.14 154.16 26.68 154.16 31.83C154.16 36.98 158.47 41.52 165.73 41.52ZM165.73 26.5C169.93 26.5 172.15 28.71 172.15 31.83C172.15 34.95 169.93 37.16 165.73 37.16C161.53 37.16 159.31 34.95 159.31 31.83C159.31 28.71 161.53 26.5 165.73 26.5Z" fill="#1A1A1A"/><path d="M199.16 41.52V35.67H185.08V41.52H180V18H185.08V29.68H199.16V23.83L205.23 18H212.02L204.5 26.12L212.38 41.52H205.42L200.27 32.25L199.16 32.87V41.52H199.16Z" fill="#1A1A1A"/></svg>
+                           <h1 className="text-xl md:text-2xl font-bold text-gray-800 ml-4">Dashboard de Análise de Notas Fiscais</h1>
+                       </div>
+                    </div>
+                </header>
+    
+                <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="bg-white rounded-lg shadow-lg">
+                        <div className="border-b border-gray-200">
+                            <nav className="-mb-px flex space-x-8 px-8" aria-label="Tabs">
+                                <button onClick={() => setActiveTab('upload')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'upload' ? 'border-bridgestone-primary text-bridgestone-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Upload</button>
+                                <button onClick={() => setActiveTab('rejections')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'rejections' ? 'border-bridgestone-primary text-bridgestone-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Análise de Rejeições</button>
+                                <button onClick={() => setActiveTab('corrections')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'corrections' ? 'border-bridgestone-primary text-bridgestone-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>Análise de Correções</button>
+                            </nav>
+                        </div>
+                        <div className="p-8">
+                            {activeTab === 'upload' && renderUploadTab()}
+                            {activeTab === 'rejections' && <RejectionsDashboard data={processedData.rejectionsData} sefazErrorMap={processedData.sefazErrorMap} onExport={exportToExcel}/>}
+                            {activeTab === 'corrections' && <CorrectionsDashboard data={processedData.correctionsData} onExport={exportToExcel}/>}
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    window.onload = startApp;
+</script>
+&lt;/body>
+&lt;/html>
+
+&lt;/immersive&gt;
